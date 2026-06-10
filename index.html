@@ -479,11 +479,12 @@ function render() {
   if (multi) {
     const showPenCol = penaltyTotal > 0;
     html += '<div class="sect">原貸款明細</div>';
-    html += '<table style="font-size:11px"><thead><tr><th>名稱</th><th>金額</th><th>利率</th><th>期數</th><th>月付</th>' + (showPenCol ? '<th>違約金</th><th>清償金額</th>' : '') + '</tr></thead><tbody>';
+    html += '<table style="font-size:11px"><thead><tr><th>名稱</th><th>金額</th>' + (anyDate ? '<th>目前餘額</th>' : '') + '<th>利率</th><th>期數</th><th>月付</th>' + (showPenCol ? '<th>違約金</th><th>清償金額</th>' : '') + '</tr></thead><tbody>';
     origA.forEach(x => {
       const nm = escapeHtml(x.name) + (x.isBank ? ' <span class="small">🏦銀行</span>' : '');
       const per = x.hasDate ? ('剩' + x.remainingPeriods + '/共' + x.periodsTotal) : (x.periodsTotal + ' 期');
-      html += '<tr><td>' + nm + '</td><td>$' + nf(x.principal) + '</td><td>' + x.curRate + '%</td><td>' + per + '</td><td>$' + nf(x.firstPayment) + '</td>'
+      const balCell = anyDate ? ('<td>' + (x.hasDate ? '$' + nf(x.balanceNow) : '—') + '</td>') : '';
+      html += '<tr><td>' + nm + '</td><td>$' + nf(x.principal) + '</td>' + balCell + '<td>' + x.curRate + '%</td><td>' + per + '</td><td>$' + nf(x.firstPayment) + '</td>'
         + (showPenCol ? ('<td>' + (x.penalty ? '$' + nf(x.penalty) : '—') + '</td><td>$' + nf(x.payoff) + '</td>') : '') + '</tr>';
     });
     html += '</tbody></table>';
@@ -500,6 +501,7 @@ function render() {
   if (multi) { periodCell = (minP === maxP ? minP + ' 期' : minP + '～' + maxP + ' 期') + (anyDate ? '<br><span class="small">剩餘期數</span>' : ''); }
   else { const x = origA[0]; periodCell = x.hasDate ? ('剩 ' + x.remainingPeriods + ' / 共 ' + x.periodsTotal + ' 期') : (x.periodsTotal + ' 期 (' + (x.periodsTotal / 12).toFixed(1) + '年)'); }
   html += '<tr><td>還款期</td><td>' + periodCell + '</td><td>' + L2.periods + ' 期 (' + (L2.periods / 12).toFixed(1) + '年)</td></tr>';
+  if (!multi && origA[0].hasDate) html += '<tr><td>目前本金餘額<br><span class="small">（依起始日試算至今）</span></td><td>$' + nf(origA[0].balanceNow) + '</td><td>—</td></tr>';
   if (anyGrace || d2.hasGrace) html += '<tr><td>寬限期</td><td>' + (anyGrace ? '有' : '無') + '</td><td>' + (d2.hasGrace ? d2.graceMonths + ' 期' : '無') + '</td></tr>';
   html += '<tr><td>每月應繳' + (anyGrace || d2.hasGrace ? '（初期）' : '') + (anyDate ? '（目前）' : '') + '</td><td><span class="pill r">$' + nf(sumFirst) + '</span></td><td>' + payCellD2(d2) + '</td></tr>';
   if (monthlySavings > 0) html += '<tr class="hl"><td>每月現金流改善</td><td></td><td>節省 $' + nf(monthlySavings) + ' ↓' + pct.toFixed(1) + '%</td></tr>';
