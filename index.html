@@ -16,11 +16,14 @@
   .card h3 { margin: 0 0 14px; font-size: 17px; }
   .name-input { border: none; border-bottom: 1.5px dashed currentColor; background: transparent; font-size: inherit; font-weight: bold; color: inherit; width: 100%; outline: none; padding: 2px 0; }
   .name-input:focus { border-bottom-style: solid; }
+  .seclabel { font-size: 14px; font-weight: bold; color: #e8505b; margin: 4px 2px 10px; }
   label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
-  input[type=number] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+  input[type=number], input[type=date] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
   .field { margin-bottom: 14px; }
   .hint { font-size: 12px; color: #999; margin: 6px 0 0; }
   .calc { font-size: 13px; font-weight: bold; margin: 6px 0 0; }
+  .bankchk { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; margin-bottom: 14px; cursor: pointer; }
+  .bankchk input { width: auto; }
   .stage { background: #f7f9fb; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
   .stage-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .stage-head span { font-size: 13px; color: #666; font-weight: bold; }
@@ -69,9 +72,7 @@
   .repay-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
   .repay-toggle button { flex: 1; padding: 8px; border: 1px solid #ddd; background: #fff; border-radius: 8px; font-size: 13px; cursor: pointer; color: #888; }
   .repay-toggle button.on { background: #1a5490; color: #fff; border-color: #1a5490; }
-  .io-warn { background: #fff3cd; border: 1px solid #ffc107; padding: 10px 12px; border-radius: 8px; font-size: 12px; color: #856404; margin-top: 8px; line-height: 1.6; }
-  .loan1b-wrap { border: 1px dashed #e8505b; border-radius: 10px; padding: 14px; margin-top: 4px; margin-bottom: 14px; background: #fff8f8; }
-  .loan1b-wrap h4 { margin: 0 0 12px; font-size: 14px; color: #e8505b; }
+  .io-warn { background: #fff3cd; border: 1px solid #ffc107; padding: 10px 12px; border-radius: 8px; font-size: 12px; color: #856404; margin-top: 8px; line-height: 1.7; }
   .header-card { border-left: 4px solid #6c5ce7; }
   .header-card h3 { color: #6c5ce7; }
   .header-card input[type=text], .header-card input[type=date] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
@@ -86,7 +87,7 @@
 <body>
 <div class="wrap">
   <h1>貸款轉貸提案</h1>
-  <p class="sub">本息攤還 · 多段利率 · 寬限期 · 回本試算 · 可匯出</p>
+  <p class="sub">本息攤還 · 多段利率 · 寬限期 · 多筆原貸 · 違約金 · 回本試算 · 可匯出</p>
 
   <div class="export-bar">
     <button id="btnPdf">匯出 PDF</button>
@@ -103,43 +104,10 @@
     <div class="field" style="margin-bottom:0"><label>提案日期</label><input type="date" id="proposalDate"></div>
   </div>
 
-  <!-- 方案1 -->
-  <div class="card" style="border-left:4px solid #e8505b">
-    <h3 style="color:#e8505b"><input class="name-input" id="name1" value="方案 1（現況）"></h3>
-    <div class="field"><label>還款方式</label>
-      <div class="repay-toggle" id="toggleRepay1">
-        <button data-mode="amort" class="on">本利攤還</button>
-        <button data-mode="io">純繳息（到期還本）</button>
-      </div>
-    </div>
-    <div class="field"><label>貸款金額（元）</label><input type="number" id="p1" value="2500000"></div>
-    <div class="field"><label>期數（月）</label><input type="number" id="n1" value="120"><p class="hint" id="y1"></p></div>
-    <div class="field" id="g1wrap"><label>寬限期（選填，月）</label><input type="number" id="g1" placeholder="0 = 無寬限期"><p class="hint">寬限期內只繳息、不還本</p></div>
-    <div class="field"><label>第一段利率（%）· 第 1 期起</label><input type="number" step="0.01" id="r1" value="14"></div>
-    <div id="stages1"></div>
-    <button class="addbtn" id="add1" style="border-color:#e8505b;color:#e8505b">+ 新增分段利率（選填）</button>
-
-    <!-- 第二筆貸款 -->
-    <div style="margin-top:14px">
-      <button class="addbtn" id="addLoan1b" style="border-color:#e8505b;color:#e8505b">+ 新增第二筆貸款（選填，兩筆合計比較）</button>
-    </div>
-    <div id="loan1bWrap" style="display:none" class="loan1b-wrap">
-      <h4><input class="name-input" id="name1b" value="第二筆貸款（現況）" style="font-size:14px"></h4>
-      <div class="field"><label>還款方式</label>
-        <div class="repay-toggle" id="toggleRepay1b">
-          <button data-mode="amort" class="on">本利攤還</button>
-          <button data-mode="io">純繳息（到期還本）</button>
-        </div>
-      </div>
-      <div class="field"><label>貸款金額（元）</label><input type="number" id="p1b" placeholder="第二筆本金"></div>
-      <div class="field"><label>期數（月）</label><input type="number" id="n1b" value="120"><p class="hint" id="y1b"></p></div>
-      <div class="field" id="g1bwrap"><label>寬限期（選填，月）</label><input type="number" id="g1b" placeholder="0 = 無寬限期"><p class="hint">寬限期內只繳息、不還本</p></div>
-      <div class="field"><label>第一段利率（%）· 第 1 期起</label><input type="number" step="0.01" id="r1b" value="14"></div>
-      <div id="stages1b"></div>
-      <button class="addbtn" id="add1b" style="border-color:#e8505b;color:#e8505b">+ 新增分段利率（選填）</button>
-      <button class="rm" id="removeLoan1b" style="margin-top:10px;display:block">✕ 移除第二筆</button>
-    </div>
-  </div>
+  <!-- 原貸款（現況）動態列表 -->
+  <div class="seclabel">原貸款（現況）</div>
+  <div id="origLoans"></div>
+  <button class="addbtn" id="addOrigLoan" style="border-color:#e8505b;color:#e8505b;margin-bottom:18px">+ 新增原貸款（最多 5 筆）</button>
 
   <!-- 方案2 -->
   <div class="card" style="border-left:4px solid #14a098">
@@ -163,14 +131,18 @@
     <h3 style="color:#d68f00">費用明細（選填）</h3>
     <div class="field">
       <label>轉貸服務費</label>
-      <div class="seg" id="segSvc"><button data-mode="percent" class="on">按 % 計算</button><button data-mode="amount">直接填金額</button></div>
-      <div id="svcPct"><input type="number" step="0.1" id="svcPercent" placeholder="例如 6（% × 新貸款額）"><p class="calc" id="svcCalc" style="color:#d68f00"></p></div>
+      <div class="seg" id="segSvc">
+        <button data-mode="percent" class="on">% × 新貸款</button>
+        <button data-mode="diff">差額 %</button>
+        <button data-mode="amount">直接金額</button>
+      </div>
+      <div id="svcPct"><input type="number" step="0.1" id="svcPercent" placeholder="輸入百分比 %"><p class="hint" id="svcFormula"></p><p class="calc" id="svcCalc" style="color:#d68f00"></p></div>
       <div id="svcAmt" style="display:none"><input type="number" id="svcAmount" placeholder="直接輸入金額（元）"></div>
     </div>
     <div class="field" style="margin-bottom:0">
       <label>代墊費用</label>
       <div class="seg" id="segAdv"><button data-mode="percent" class="on">按 % 計算</button><button data-mode="amount">直接填金額</button></div>
-      <div id="advPct"><input type="number" step="0.1" id="advPercent" placeholder="例如 4（% × 原貸款額）"><p class="calc" id="advCalc" style="color:#d68f00"></p></div>
+      <div id="advPct"><input type="number" step="0.1" id="advPercent" placeholder="例如 4（% × 非銀行原貸款額）"><p class="hint">基數為「非銀行」原貸款本金合計（銀行那筆不計）</p><p class="calc" id="advCalc" style="color:#d68f00"></p></div>
       <div id="advAmt" style="display:none"><input type="number" id="advAmount" placeholder="直接輸入金額（元）"></div>
     </div>
   </div>
@@ -179,16 +151,21 @@
 </div>
 
 <script>
+const palette = ['#e8505b', '#f6a04d', '#e6739f', '#9b59b6', '#e67e22'];
+
 const state = {
   header: { clientName: '', agentName: '', date: '' },
-  loan1: { name: '方案 1（現況）', principal: 2500000, periods: 120, grace: 0, stages: [{ fromMonth: 1, rate: 14 }], interestOnly: false },
-  loan1b: { name: '第二筆貸款（現況）', active: false, principal: 0, periods: 120, grace: 0, stages: [{ fromMonth: 1, rate: 14 }], interestOnly: false },
+  origLoans: [
+    { name: '原貸款（現況）', isBank: false, interestOnly: false, principal: 2500000, periods: 120, grace: 0, stages: [{ fromMonth: 1, rate: 14 }], startDate: '', lockPeriods: 0, penaltyPct: 0 }
+  ],
   loan2: { name: '方案 2（轉貸後）', principal: 3000000, periods: 240, grace: 0, stages: [{ fromMonth: 1, rate: 2.8 }], interestOnly: false },
   svc: { mode: 'percent', percent: '', amount: '' },
   adv: { mode: 'percent', percent: '', amount: '' }
 };
 
 const nf = (v) => Math.round(v).toLocaleString('en-US');
+const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const escapeAttr = (s) => String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
 function payment(bal, annualRate, n) {
   const r = annualRate / 100 / 12;
@@ -197,107 +174,100 @@ function payment(bal, annualRate, n) {
   return bal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
 }
 
-function calcStaged(principal, periods, stages, graceMonths, interestOnly) {
-  if (interestOnly) {
-    // 純繳息：每月固定繳息，本金期滿一次清償
-    const sorted = stages.filter(s => s.rate >= 0 && s.fromMonth >= 1).sort((a, b) => a.fromMonth - b.fromMonth);
-    if (!sorted.length || sorted[0].fromMonth !== 1) sorted.unshift({ fromMonth: 1, rate: stages[0] ? stages[0].rate : 0 });
-    const rateAt = (month) => { let rate = sorted[0].rate; for (const s of sorted) if (month >= s.fromMonth) rate = s.rate; return rate; };
-    let totalInterest = 0;
-    const segments = [];
-    for (let m = 1; m <= periods; m++) {
-      const rate = rateAt(m);
-      const pay = principal * (rate / 100 / 12);
-      totalInterest += pay;
-      const rp = Math.round(pay);
-      const last = segments[segments.length - 1];
-      if (!last || last.rate !== rate || Math.abs(last.pay - rp) > 1)
-        segments.push({ fromMonth: m, type: 'io', rate, pay: rp });
-    }
-    return {
-      segments,
-      firstPayment: segments.length ? segments[0].pay : 0,
-      afterGracePayment: 0,
-      hasGrace: false,
-      graceMonths: 0,
-      totalInterest: Math.round(totalInterest),
-      totalPayments: Math.round(totalInterest + principal),
-      multiSegment: segments.length > 1,
-      interestOnly: true,
-      balloon: principal
-    };
-  }
-  graceMonths = Math.max(0, Math.min(graceMonths || 0, periods));
-  const sorted = stages.filter(s => s.rate >= 0 && s.fromMonth >= 1 && s.fromMonth <= periods)
-    .sort((a, b) => a.fromMonth - b.fromMonth);
-  if (sorted.length === 0 || sorted[0].fromMonth !== 1) sorted.unshift({ fromMonth: 1, rate: stages[0] ? stages[0].rate : 0 });
+// 月份差（起始日 → 今天 的「整月數」）
+function monthsBetween(startISO, today) {
+  const s = new Date(startISO + 'T00:00:00');
+  if (isNaN(s.getTime())) return 0;
+  let m = (today.getFullYear() - s.getFullYear()) * 12 + (today.getMonth() - s.getMonth());
+  if (today.getDate() < s.getDate()) m -= 1;
+  return m;
+}
 
-  const rateAt = (month) => {
-    let rate = sorted[0].rate;
-    for (const s of sorted) if (month >= s.fromMonth) rate = s.rate;
-    return rate;
-  };
+// 逐月模擬，回傳每月明細
+function simulate(loan) {
+  const principal = loan.principal || 0;
+  const periods = loan.periods || 0;
+  const io = !!loan.interestOnly;
+  const stages = (loan.stages && loan.stages.length) ? loan.stages : [{ fromMonth: 1, rate: 0 }];
+  const graceMonths = io ? 0 : Math.max(0, Math.min(loan.grace || 0, periods));
+  const sorted = stages.filter(s => s.rate >= 0 && s.fromMonth >= 1).sort((a, b) => a.fromMonth - b.fromMonth);
+  if (!sorted.length || sorted[0].fromMonth !== 1) sorted.unshift({ fromMonth: 1, rate: stages[0] ? stages[0].rate : 0 });
+  const rateAt = (month) => { let r = sorted[0].rate; for (const s of sorted) if (month >= s.fromMonth) r = s.rate; return r; };
 
-  let balance = principal, totalInterest = 0, totalPayments = 0;
-  let currentPay = 0, lastRate = null;
-  const segments = [];
-
+  const months = [];
+  let balance = principal, currentPay = 0, lastRate = null;
   for (let m = 1; m <= periods; m++) {
-    const rate = rateAt(m);
-    const mr = rate / 100 / 12;
-    let pay, type;
-    if (m <= graceMonths) {
-      type = 'grace';
-      pay = balance * mr; // 只繳息
-      totalInterest += pay;
-      totalPayments += pay;
+    const rate = rateAt(m), mr = rate / 100 / 12;
+    let pay, interest, type;
+    if (io) {
+      type = 'io'; interest = balance * mr; pay = interest;
+    } else if (m <= graceMonths) {
+      type = 'grace'; interest = balance * mr; pay = interest;
     } else {
       type = 'amort';
-      if (rate !== lastRate || m === graceMonths + 1) {
-        currentPay = payment(balance, rate, periods - m + 1);
-        lastRate = rate;
-      }
-      pay = currentPay;
-      const interest = balance * mr;
-      balance -= (pay - interest);
-      totalInterest += interest;
-      totalPayments += pay;
+      if (rate !== lastRate || m === graceMonths + 1) { currentPay = payment(balance, rate, periods - m + 1); lastRate = rate; }
+      pay = currentPay; interest = balance * mr; balance -= (pay - interest);
     }
-    const rp = Math.round(pay);
-    const last = segments[segments.length - 1];
-    if (!last || last.type !== type || last.rate !== rate || Math.abs(last.pay - rp) > 1)
-      segments.push({ fromMonth: m, type, rate, pay: rp });
+    months.push({ m, rate, type, pay, interest, balanceAfter: balance });
   }
+  return { months, periods, principal };
+}
 
+// 分析單筆貸款：含「起始日 → 剩餘」與違約金 / 清償金額
+function analyze(loan, today) {
+  const sim = simulate(loan);
+  const periods = sim.periods;
+  const hasDate = !!loan.startDate;
+  let elapsed = 0;
+  if (hasDate) elapsed = Math.max(0, Math.min(monthsBetween(loan.startDate, today), periods));
+
+  const remMonths = sim.months.slice(elapsed);
+  const balanceNow = elapsed > 0 ? (sim.months[elapsed - 1] ? sim.months[elapsed - 1].balanceAfter : sim.principal) : sim.principal;
+  const remainingPeriods = periods - elapsed;
+
+  let totalInterest = 0, totalPayments = 0;
+  remMonths.forEach(x => { totalInterest += x.interest; totalPayments += x.pay; });
+
+  const segments = [];
+  remMonths.forEach(x => {
+    const rp = Math.round(x.pay);
+    const last = segments[segments.length - 1];
+    if (!last || last.type !== x.type || last.rate !== x.rate || Math.abs(last.pay - rp) > 1)
+      segments.push({ fromMonth: x.m, type: x.type, rate: x.rate, pay: rp });
+  });
   const afterGrace = segments.find(s => s.type === 'amort');
+  const grace = loan.interestOnly ? 0 : (loan.grace || 0);
+  const hasGrace = grace > 0 && elapsed < grace;
+
+  const penaltyPct = parseFloat(loan.penaltyPct) || 0;
+  const lock = parseInt(loan.lockPeriods) || 0;
+  const inLock = lock > 0 && elapsed < lock;
+  const penalty = (inLock && penaltyPct > 0) ? Math.round((loan.principal || 0) * penaltyPct / 100) : 0;
+  const payoff = Math.round(balanceNow) + penalty; // 清償金額 = 剩餘本金餘額 + 違約金
+
+  const curRate = remMonths.length ? remMonths[0].rate : (sim.months.length ? sim.months[sim.months.length - 1].rate : (loan.stages[0] ? loan.stages[0].rate : 0));
+
   return {
-    segments,
-    firstPayment: segments.length ? segments[0].pay : 0,
+    name: loan.name, isBank: !!loan.isBank, principal: loan.principal || 0,
+    periodsTotal: periods, elapsed, remainingPeriods, hasDate,
+    balanceNow: Math.round(balanceNow),
+    firstPayment: remMonths.length ? Math.round(remMonths[0].pay) : 0,
     afterGracePayment: afterGrace ? afterGrace.pay : 0,
-    hasGrace: graceMonths > 0,
-    graceMonths,
-    totalInterest: Math.round(totalInterest),
-    totalPayments: Math.round(totalPayments),
-    multiSegment: segments.length > 1,
-    interestOnly: false,
-    balloon: 0
+    totalInterest: Math.round(totalInterest), totalPayments: Math.round(totalPayments),
+    segments, multiSegment: segments.length > 1, hasGrace, graceMonths: grace,
+    interestOnly: !!loan.interestOnly, balloon: loan.interestOnly ? Math.round(balanceNow) : 0,
+    penalty, payoff, lock, inLock, curRate
   };
 }
 
-function feeAmount(fee, base) {
-  if (fee.mode === 'percent') { const p = parseFloat(fee.percent); return p > 0 ? Math.round(base * p / 100) : 0; }
-  const a = parseFloat(fee.amount); return a > 0 ? Math.round(a) : 0;
-}
-
-function ratesLabel(loan) {
+function ratesLabelStages(loan) {
   const s = [...loan.stages].sort((a, b) => a.fromMonth - b.fromMonth);
   if (s.length === 1) return s[0].rate + '%';
   return s.map(x => '第' + x.fromMonth + '期 ' + x.rate + '%').join('<br>');
 }
 
-function renderStages(loanKey, containerId) {
-  const loan = state[loanKey];
-  const c = document.getElementById(containerId);
+// ====== 原貸款卡片（動態） ======
+function renderLoanStages(loan, c) {
   c.innerHTML = '';
   loan.stages.slice(1).forEach((stage, i) => {
     const idx = i + 1;
@@ -307,67 +277,174 @@ function renderStages(loanKey, containerId) {
       '<div class="stage-head"><span>第 ' + (idx + 1) + ' 段（選填）</span><button class="rm">移除</button></div>' +
       '<div class="grid2"><div><label>第幾期起</label><input type="number" class="sf" value="' + stage.fromMonth + '"></div>' +
       '<div><label>利率（%）</label><input type="number" step="0.01" class="sr" value="' + stage.rate + '"></div></div>';
-    div.querySelector('.rm').onclick = () => { loan.stages.splice(idx, 1); renderStages(loanKey, containerId); render(); };
+    div.querySelector('.rm').onclick = () => { loan.stages.splice(idx, 1); renderLoanStages(loan, c); render(); };
     div.querySelector('.sf').oninput = (e) => { loan.stages[idx].fromMonth = parseInt(e.target.value) || 1; render(); };
     div.querySelector('.sr').oninput = (e) => { loan.stages[idx].rate = parseFloat(e.target.value) || 0; render(); };
     c.appendChild(div);
   });
 }
 
+function loanCardEl(loan, idx) {
+  const col = palette[idx % palette.length];
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.borderLeft = '4px solid ' + col;
+  const removeBtn = state.origLoans.length > 1 ? '<button class="rm" data-act="remove" style="margin-top:6px;display:block">✕ 移除此筆</button>' : '';
+  card.innerHTML =
+    '<h3 style="color:' + col + '"><input class="name-input" data-f="name" value="' + escapeAttr(loan.name) + '"></h3>' +
+    '<label class="bankchk"><input type="checkbox" data-f="isBank"' + (loan.isBank ? ' checked' : '') + '> 此筆為<b>銀行貸款</b>（影響代墊／差額計算）</label>' +
+    '<div class="field"><label>還款方式</label><div class="repay-toggle" data-f="repay">' +
+      '<button data-mode="amort" class="' + (loan.interestOnly ? '' : 'on') + '">本利攤還</button>' +
+      '<button data-mode="io" class="' + (loan.interestOnly ? 'on' : '') + '">純繳息（到期還本）</button></div></div>' +
+    '<div class="field"><label>貸款金額（元）</label><input type="number" data-f="principal" value="' + (loan.principal || '') + '"></div>' +
+    '<div class="field"><label>期數（月）</label><input type="number" data-f="periods" value="' + (loan.periods || '') + '"><p class="hint" data-f="yhint"></p></div>' +
+    '<div class="field" data-f="gracewrap"' + (loan.interestOnly ? ' style="display:none"' : '') + '><label>寬限期（選填，月）</label><input type="number" data-f="grace" value="' + (loan.grace || '') + '" placeholder="0 = 無寬限期"><p class="hint">寬限期內只繳息、不還本</p></div>' +
+    '<div class="field"><label>第一段利率（%）· 第 1 期起</label><input type="number" step="0.01" data-f="rate0" value="' + loan.stages[0].rate + '"></div>' +
+    '<div data-f="stages"></div>' +
+    '<button class="addbtn" data-act="addStage" style="border-color:' + col + ';color:' + col + '">+ 新增分段利率（選填）</button>' +
+    '<div class="grid2" style="margin-top:14px"><div><label>起始日期（選填）</label><input type="date" data-f="startDate" value="' + (loan.startDate || '') + '"></div>' +
+    '<div><label>綁約期數（選填）</label><input type="number" data-f="lockPeriods" value="' + (loan.lockPeriods || '') + '" placeholder="如 20"></div></div>' +
+    '<p class="hint" data-f="datehint" style="margin-top:6px"></p>' +
+    '<div class="field" style="margin-top:10px"><label>違約金（選填，%）· 綁約期內提前清償收取</label><input type="number" step="0.1" data-f="penaltyPct" value="' + (loan.penaltyPct || '') + '" placeholder="如 12（× 原始借款金額）"><p class="hint" data-f="penaltyHint"></p></div>' +
+    removeBtn;
+
+  const q = (s) => card.querySelector(s);
+  const updateYHint = () => { const h = q('[data-f="yhint"]'); if (h) h.textContent = loan.periods ? '= ' + (loan.periods / 12).toFixed(1) + ' 年' : ''; };
+  const updateDateHint = () => {
+    const h = q('[data-f="datehint"]'); if (!h) return;
+    if (loan.startDate) {
+      const e = Math.max(0, Math.min(monthsBetween(loan.startDate, new Date()), loan.periods || 0));
+      h.textContent = '已繳約 ' + e + ' 期，剩餘 ' + ((loan.periods || 0) - e) + ' 期（現況將以「剩餘」計算）';
+    } else h.textContent = '';
+  };
+  const updatePenaltyHint = () => {
+    const h = q('[data-f="penaltyHint"]'); if (!h) return;
+    const pct = parseFloat(loan.penaltyPct) || 0, lock = parseInt(loan.lockPeriods) || 0;
+    if (pct > 0 && lock > 0) {
+      const e = loan.startDate ? Math.max(0, Math.min(monthsBetween(loan.startDate, new Date()), loan.periods || 0)) : 0;
+      const pen = Math.round((loan.principal || 0) * pct / 100);
+      h.textContent = e < lock ? ('綁約 ' + lock + ' 期內（已繳 ' + e + ' 期），違約金 ≈ $' + nf(pen)) : ('已過綁約期（已繳 ' + e + ' 期 ≥ ' + lock + '），不收違約金');
+    } else h.textContent = '';
+  };
+
+  q('[data-f="name"]').oninput = (e) => { loan.name = e.target.value || ('原貸款' + (idx + 1)); render(); };
+  q('[data-f="isBank"]').onchange = (e) => { loan.isBank = e.target.checked; render(); };
+  card.querySelectorAll('[data-f="repay"] button').forEach(b => {
+    b.onclick = () => {
+      card.querySelectorAll('[data-f="repay"] button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      loan.interestOnly = b.dataset.mode === 'io';
+      q('[data-f="gracewrap"]').style.display = loan.interestOnly ? 'none' : '';
+      render();
+    };
+  });
+  q('[data-f="principal"]').oninput = (e) => { loan.principal = Number(e.target.value) || 0; updatePenaltyHint(); render(); };
+  q('[data-f="periods"]').oninput = (e) => { loan.periods = parseInt(e.target.value) || 0; updateYHint(); updateDateHint(); render(); };
+  q('[data-f="grace"]').oninput = (e) => { loan.grace = parseInt(e.target.value) || 0; render(); };
+  q('[data-f="rate0"]').oninput = (e) => { loan.stages[0].rate = parseFloat(e.target.value) || 0; render(); };
+  q('[data-f="startDate"]').oninput = (e) => { loan.startDate = e.target.value; updateDateHint(); updatePenaltyHint(); render(); };
+  q('[data-f="lockPeriods"]').oninput = (e) => { loan.lockPeriods = parseInt(e.target.value) || 0; updatePenaltyHint(); render(); };
+  q('[data-f="penaltyPct"]').oninput = (e) => { loan.penaltyPct = parseFloat(e.target.value) || 0; updatePenaltyHint(); render(); };
+  card.querySelector('[data-act="addStage"]').onclick = () => {
+    if (loan.stages.length >= 4) return;
+    const last = loan.stages[loan.stages.length - 1];
+    loan.stages.push({ fromMonth: Math.min(last.fromMonth + 24, loan.periods || 999), rate: last.rate });
+    renderLoanStages(loan, q('[data-f="stages"]')); render();
+  };
+  const rm = card.querySelector('[data-act="remove"]');
+  if (rm) rm.onclick = () => { const i = state.origLoans.indexOf(loan); if (i >= 0 && state.origLoans.length > 1) { state.origLoans.splice(i, 1); renderOrigLoans(); render(); } };
+
+  renderLoanStages(loan, q('[data-f="stages"]'));
+  updateYHint(); updateDateHint(); updatePenaltyHint();
+  return card;
+}
+
+function renderOrigLoans() {
+  const cont = document.getElementById('origLoans');
+  cont.innerHTML = '';
+  state.origLoans.forEach((loan, idx) => cont.appendChild(loanCardEl(loan, idx)));
+  document.getElementById('addOrigLoan').style.display = state.origLoans.length >= 5 ? 'none' : 'block';
+}
+
+// ====== 方案2 分段利率 ======
+function renderStages2() {
+  const loan = state.loan2;
+  const c = document.getElementById('stages2');
+  c.innerHTML = '';
+  loan.stages.slice(1).forEach((stage, i) => {
+    const idx = i + 1;
+    const div = document.createElement('div');
+    div.className = 'stage';
+    div.innerHTML =
+      '<div class="stage-head"><span>第 ' + (idx + 1) + ' 段（選填）</span><button class="rm">移除</button></div>' +
+      '<div class="grid2"><div><label>第幾期起</label><input type="number" class="sf" value="' + stage.fromMonth + '"></div>' +
+      '<div><label>利率（%）</label><input type="number" step="0.01" class="sr" value="' + stage.rate + '"></div></div>';
+    div.querySelector('.rm').onclick = () => { loan.stages.splice(idx, 1); renderStages2(); render(); };
+    div.querySelector('.sf').oninput = (e) => { loan.stages[idx].fromMonth = parseInt(e.target.value) || 1; render(); };
+    div.querySelector('.sr').oninput = (e) => { loan.stages[idx].rate = parseFloat(e.target.value) || 0; render(); };
+    c.appendChild(div);
+  });
+}
+
+// ====== 主渲染 ======
 function render() {
-  const L1 = state.loan1, L2 = state.loan2, L1b = state.loan1b;
-  const d1a = calcStaged(L1.principal, L1.periods, L1.stages, L1.grace, L1.interestOnly);
-  const d1b = L1b.active && L1b.principal > 0
-    ? calcStaged(L1b.principal, L1b.periods, L1b.stages, L1b.grace, L1b.interestOnly) : null;
-  const d2 = calcStaged(L2.principal, L2.periods, L2.stages, L2.grace, L2.interestOnly);
+  const today = new Date();
+  const L2 = state.loan2;
+  const origA = state.origLoans.map(l => analyze(l, today));
+  const d2 = analyze(L2, today);
 
-  // Combined d1 = d1a + optional d1b
-  const d1 = d1b ? {
-    firstPayment: d1a.firstPayment + d1b.firstPayment,
-    afterGracePayment: d1a.afterGracePayment + d1b.afterGracePayment,
-    totalInterest: d1a.totalInterest + d1b.totalInterest,
-    totalPayments: d1a.totalPayments + d1b.totalPayments,
-    hasGrace: d1a.hasGrace || d1b.hasGrace,
-    graceMonths: Math.max(d1a.graceMonths, d1b.graceMonths),
-    multiSegment: d1a.multiSegment || d1b.multiSegment,
-    segments: d1a.segments,
-    interestOnly: d1a.interestOnly || d1b.interestOnly,
-    balloon: d1a.balloon + d1b.balloon,
-    isCombined: true, d1a, d1b
-  } : { ...d1a, isCombined: false };
+  const sumPrincipal = origA.reduce((a, x) => a + x.principal, 0);
+  const sumFirst = origA.reduce((a, x) => a + x.firstPayment, 0);
+  const sumInterest = origA.reduce((a, x) => a + x.totalInterest, 0);
+  const penaltyTotal = origA.reduce((a, x) => a + x.penalty, 0);
+  const bankPrincipal = origA.filter(x => x.isBank).reduce((a, x) => a + x.principal, 0);
+  const nonBankPrincipal = origA.filter(x => !x.isBank).reduce((a, x) => a + x.principal, 0);
+  const wAvgRate = sumPrincipal > 0 ? origA.reduce((a, x) => a + x.curRate * x.principal, 0) / sumPrincipal : 0;
+  const remP = origA.map(x => x.hasDate ? x.remainingPeriods : x.periodsTotal);
+  const minP = Math.min(...remP), maxP = Math.max(...remP);
+  const anyDate = origA.some(x => x.hasDate);
+  const anyGrace = origA.some(x => x.hasGrace);
+  const anyIO = origA.some(x => x.interestOnly);
+  const multi = origA.length > 1;
 
-  document.getElementById('y1').textContent = '= ' + (L1.periods / 12).toFixed(1) + ' 年';
+  // 方案2 介面提示
   document.getElementById('y2').textContent = '= ' + (L2.periods / 12).toFixed(1) + ' 年';
-  if (document.getElementById('y1b')) document.getElementById('y1b').textContent = L1b.active ? '= ' + (L1b.periods / 12).toFixed(1) + ' 年' : '';
-
-  // 純繳息時隱藏寬限期欄
-  document.getElementById('g1wrap').style.display = L1.interestOnly ? 'none' : '';
-  if (document.getElementById('g1bwrap')) document.getElementById('g1bwrap').style.display = L1b.interestOnly ? 'none' : '';
   document.getElementById('g2wrap').style.display = L2.interestOnly ? 'none' : '';
 
-  const loan1TotalPrincipal = L1.principal + (d1b ? L1b.principal : 0);
-  const svcFee = feeAmount(state.svc, L2.principal);
-  const advFee = feeAmount(state.adv, loan1TotalPrincipal);
-  const totalFee = svcFee + advFee;
+  // 費用
+  let svcFee = 0;
+  if (state.svc.mode === 'amount') { const a = parseFloat(state.svc.amount); svcFee = a > 0 ? Math.round(a) : 0; }
+  else { const p = parseFloat(state.svc.percent); if (p > 0) { const base = state.svc.mode === 'diff' ? Math.max(0, (L2.principal || 0) - bankPrincipal) : (L2.principal || 0); svcFee = Math.round(base * p / 100); } }
+  let advFee = 0;
+  if (state.adv.mode === 'amount') { const a = parseFloat(state.adv.amount); advFee = a > 0 ? Math.round(a) : 0; }
+  else { const p = parseFloat(state.adv.percent); if (p > 0) advFee = Math.round(nonBankPrincipal * p / 100); }
+  const baseFee = svcFee + advFee;
+  const totalFee = baseFee + penaltyTotal;
   const hasFees = totalFee > 0;
-  document.getElementById('svcCalc').textContent = (state.svc.mode === 'percent' && svcFee > 0) ? '= $' + nf(svcFee) : '';
-  document.getElementById('advCalc').textContent = (state.adv.mode === 'percent' && advFee > 0) ? '= $' + nf(advFee) : '';
 
-  const monthlySavings = d1.firstPayment - d2.firstPayment;
-  const pct = d1.firstPayment > 0 ? (monthlySavings / d1.firstPayment * 100) : 0;
-  const paybackMonths = (hasFees && monthlySavings > 0) ? totalFee / monthlySavings : null;
-  const netSavings = d1.totalInterest - d2.totalInterest - totalFee;
-  const yearsDiff = (L2.periods - L1.periods) / 12;
+  // 費用輸入區提示
+  const svcFormulaEl = document.getElementById('svcFormula');
+  if (svcFormulaEl) svcFormulaEl.textContent = state.svc.mode === 'diff'
+    ? '差額 = 新貸款 $' + nf(L2.principal) + ' − 銀行原貸 $' + nf(bankPrincipal)
+    : (state.svc.mode === 'percent' ? '基數 = 新貸款額 $' + nf(L2.principal) : '');
+  const svcCalcEl = document.getElementById('svcCalc');
+  if (svcCalcEl) svcCalcEl.textContent = ((state.svc.mode === 'percent' || state.svc.mode === 'diff') && svcFee > 0) ? '= $' + nf(svcFee) : '';
+  const advCalcEl = document.getElementById('advCalc');
+  if (advCalcEl) advCalcEl.textContent = (state.adv.mode === 'percent' && advFee > 0) ? '= $' + nf(advFee) : '';
 
-  const maxPay = Math.max(d1.firstPayment, d2.firstPayment) || 1;
+  const monthlySavings = sumFirst - d2.firstPayment;
+  const pct = sumFirst > 0 ? (monthlySavings / sumFirst * 100) : 0;
+  const paybackMonths = (totalFee > 0 && monthlySavings > 0) ? totalFee / monthlySavings : null;
+  const interestSaved = sumInterest - d2.totalInterest;
+  const netSavings = interestSaved - totalFee;
+  const maxPay = Math.max(sumFirst, d2.firstPayment) || 1;
+
   const bar = (label, val, color) =>
     '<div class="bar-row"><span class="bl">' + label + '</span><div class="bar-track"><div class="bar-fill" style="width:' + (val / maxPay * 100) + '%;background:' + color + '">$' + nf(val) + '</div></div></div>';
-
-  const payCell = (d, isLoan1) => {
-    const tag = isLoan1 ? 'r' : 'g';
-    let s = '<span class="pill ' + tag + '">$' + nf(d.firstPayment) + '</span>';
-    if (d.isCombined) s += '<br><span class="small">（兩筆合計：$' + nf(d.d1a.firstPayment) + ' + $' + nf(d.d1b.firstPayment) + '）</span>';
-    if (d.hasGrace && !d.isCombined) s += '<br><span class="small">寬限期內，期滿後 $' + nf(d.afterGracePayment) + '</span>';
+  const benefit = (n, t, d) => '<div class="benefit"><span class="n">' + n + ' ' + t + '</span><span>' + d + '</span></div>';
+  const payCellD2 = (d) => {
+    let s = '<span class="pill g">$' + nf(d.firstPayment) + '</span>';
+    if (d.hasGrace) s += '<br><span class="small">寬限期內，期滿後 $' + nf(d.afterGracePayment) + '</span>';
     if (d.interestOnly) s += '<br><span class="small" style="color:#e8505b">純繳息，期滿須還本金 $' + nf(d.balloon) + '</span>';
     return s;
   };
@@ -375,98 +452,115 @@ function render() {
   let html = '';
   html += '<h2 class="ptitle">貸款轉貸提案</h2>';
 
-  // 提案抬頭
+  // 抬頭
   const h = state.header;
   const hasHeader = h.clientName || h.agentName || h.date;
   if (hasHeader) {
     const dateStr = h.date ? new Date(h.date + 'T00:00:00').toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-    html += '<div class="pheader">';
-    html += '<div class="pheader-left">';
-    if (h.clientName) {
-      html += '<div class="client-label">敬呈</div>';
-      html += '<div class="client">' + h.clientName + ' 您好</div>';
-    }
-    html += '</div>';
-    html += '<div class="pheader-right">';
-    if (h.agentName) html += '業務：' + h.agentName + '<br>';
+    html += '<div class="pheader"><div class="pheader-left">';
+    if (h.clientName) html += '<div class="client-label">敬呈</div><div class="client">' + escapeHtml(h.clientName) + ' 您好</div>';
+    html += '</div><div class="pheader-right">';
+    if (h.agentName) html += '業務：' + escapeHtml(h.agentName) + '<br>';
     if (dateStr) html += '日期：' + dateStr;
-    html += '</div>';
-    html += '</div>';
+    html += '</div></div>';
   } else {
     html += '<p class="pdate">試算日期：' + new Date().toLocaleDateString('zh-TW') + '</p>';
   }
 
-  // 重點結論卡（低調版）
-  const interestSaved = d1.totalInterest - d2.totalInterest;
+  // 結論卡
   if (monthlySavings > 0 || interestSaved > 0) {
-    let kp = '轉貸後，';
     const parts = [];
     if (monthlySavings > 0) parts.push('每月省下 <b>$' + nf(monthlySavings) + '</b>');
     if (interestSaved > 0) parts.push('總利息估省 <b>$' + nf(interestSaved) + '</b>');
-    kp += parts.join('，') + '。';
-    html += '<div class="keypoint">' + kp + '</div>';
+    html += '<div class="keypoint">轉貸後，' + parts.join('，') + '。</div>';
   }
 
+  // 原貸款明細子表（≥2 筆）
+  if (multi) {
+    const showPenCol = penaltyTotal > 0;
+    html += '<div class="sect">原貸款明細</div>';
+    html += '<table style="font-size:11px"><thead><tr><th>名稱</th><th>金額</th><th>利率</th><th>期數</th><th>月付</th>' + (showPenCol ? '<th>違約金</th><th>清償金額</th>' : '') + '</tr></thead><tbody>';
+    origA.forEach(x => {
+      const nm = escapeHtml(x.name) + (x.isBank ? ' <span class="small">🏦銀行</span>' : '');
+      const per = x.hasDate ? ('剩' + x.remainingPeriods + '/共' + x.periodsTotal) : (x.periodsTotal + ' 期');
+      html += '<tr><td>' + nm + '</td><td>$' + nf(x.principal) + '</td><td>' + x.curRate + '%</td><td>' + per + '</td><td>$' + nf(x.firstPayment) + '</td>'
+        + (showPenCol ? ('<td>' + (x.penalty ? '$' + nf(x.penalty) : '—') + '</td><td>$' + nf(x.payoff) + '</td>') : '') + '</tr>';
+    });
+    html += '</tbody></table>';
+  }
+
+  // 核心數據對比
+  const origName = multi ? '原貸款合計' : escapeHtml(origA[0].name);
   html += '<div class="sect">核心數據對比</div>';
-  html += '<table><thead><tr><th>項目</th><th class="c1">' + L1.name + '</th><th class="c2">' + L2.name + '</th></tr></thead><tbody>';
-  html += '<tr><td>貸款金額</td><td>' + (d1.isCombined ? '$' + nf(L1.principal) + '<br><span class="small">+$' + nf(L1b.principal) + '　' + L1b.name + '</span>' : '$' + nf(L1.principal)) + '</td><td>$' + nf(L2.principal) + '</td></tr>';
-  html += '<tr><td>年利率</td><td><span class="pill r">' + ratesLabel(L1) + '</span></td><td><span class="pill g">' + ratesLabel(L2) + '</span></td></tr>';
-  html += '<tr><td>還款期</td><td>' + L1.periods + ' 期 (' + (L1.periods / 12).toFixed(1) + '年)</td><td>' + L2.periods + ' 期 (' + (L2.periods / 12).toFixed(1) + '年)</td></tr>';
-  if (d1.hasGrace || d2.hasGrace)
-    html += '<tr><td>寬限期</td><td>' + (d1.hasGrace ? d1.graceMonths + ' 期' : '無') + '</td><td>' + (d2.hasGrace ? d2.graceMonths + ' 期' : '無') + '</td></tr>';
-  html += '<tr><td>每月應繳' + (d1.hasGrace || d2.hasGrace ? '（初期）' : '') + '</td><td>' + payCell(d1, true) + '</td><td>' + payCell(d2, false) + '</td></tr>';
-  if (monthlySavings > 0)
-    html += '<tr class="hl"><td>每月現金流改善</td><td></td><td>節省 $' + nf(monthlySavings) + ' ↓' + pct.toFixed(1) + '%</td></tr>';
-  html += '<tr><td>總利息支出</td><td>$' + nf(d1.totalInterest) + '</td><td>$' + nf(d2.totalInterest) + '</td></tr>';
+  html += '<table><thead><tr><th>項目</th><th class="c1">' + origName + '</th><th class="c2">' + escapeHtml(L2.name) + '</th></tr></thead><tbody>';
+  html += '<tr><td>貸款金額</td><td>$' + nf(sumPrincipal) + (multi ? '<br><span class="small">' + origA.length + ' 筆合計</span>' : '') + '</td><td>$' + nf(L2.principal) + '</td></tr>';
+  const rateCell = multi ? (wAvgRate.toFixed(2) + '%<br><span class="small">加權平均</span>') : ratesLabelStages(state.origLoans[0]);
+  html += '<tr><td>年利率</td><td><span class="pill r">' + rateCell + '</span></td><td><span class="pill g">' + ratesLabelStages(L2) + '</span></td></tr>';
+  let periodCell;
+  if (multi) { periodCell = (minP === maxP ? minP + ' 期' : minP + '～' + maxP + ' 期') + (anyDate ? '<br><span class="small">剩餘期數</span>' : ''); }
+  else { const x = origA[0]; periodCell = x.hasDate ? ('剩 ' + x.remainingPeriods + ' / 共 ' + x.periodsTotal + ' 期') : (x.periodsTotal + ' 期 (' + (x.periodsTotal / 12).toFixed(1) + '年)'); }
+  html += '<tr><td>還款期</td><td>' + periodCell + '</td><td>' + L2.periods + ' 期 (' + (L2.periods / 12).toFixed(1) + '年)</td></tr>';
+  if (anyGrace || d2.hasGrace) html += '<tr><td>寬限期</td><td>' + (anyGrace ? '有' : '無') + '</td><td>' + (d2.hasGrace ? d2.graceMonths + ' 期' : '無') + '</td></tr>';
+  html += '<tr><td>每月應繳' + (anyGrace || d2.hasGrace ? '（初期）' : '') + (anyDate ? '（目前）' : '') + '</td><td><span class="pill r">$' + nf(sumFirst) + '</span></td><td>' + payCellD2(d2) + '</td></tr>';
+  if (monthlySavings > 0) html += '<tr class="hl"><td>每月現金流改善</td><td></td><td>節省 $' + nf(monthlySavings) + ' ↓' + pct.toFixed(1) + '%</td></tr>';
+  html += '<tr><td>總利息支出' + (anyDate ? '<br><span class="small">（剩餘）</span>' : '') + '</td><td>$' + nf(sumInterest) + '</td><td>$' + nf(d2.totalInterest) + '</td></tr>';
   html += '</tbody></table>';
 
-  // 月付金階段明細（有寬限期或多段時）
-  if (d1.multiSegment || d2.multiSegment) {
+  // 月付金階段明細
+  const segGroups = [];
+  origA.forEach((x, i) => { if (x.multiSegment) segGroups.push({ segs: x.segments, t: x.name, c: palette[i % palette.length] }); });
+  if (d2.multiSegment) segGroups.push({ segs: d2.segments, t: L2.name, c: '#14a098' });
+  if (segGroups.length) {
     html += '<div class="sect">月付金階段明細</div>';
-    [{ d: d1, t: L1.name, c: '#e8505b' }, { d: d2, t: L2.name, c: '#14a098' }].forEach(g => {
-      if (!g.d.multiSegment) return;
-      html += '<p style="margin:8px 0 2px;font-size:12px;color:#888">' + g.t + '</p>';
-      g.d.segments.forEach(s => {
+    segGroups.forEach(g => {
+      html += '<p style="margin:8px 0 2px;font-size:12px;color:#888">' + escapeHtml(g.t) + '</p>';
+      g.segs.forEach(s => {
         const kind = s.type === 'grace' ? '寬限期（只繳息）' : s.type === 'io' ? '純繳息' : '一般攤還';
         html += '<div class="segrow"><span style="color:#555">第 ' + s.fromMonth + ' 期起 · ' + s.rate + '% · ' + kind + '</span><span style="color:' + g.c + ';font-weight:bold">$' + nf(s.pay) + '</span></div>';
       });
     });
-    if (d1.hasGrace || d2.hasGrace)
-      html += '<div class="gracebox">⚠ 寬限期內只繳利息、本金不減少，期滿後月付金會提高，且總利息會比無寬限期時增加。</div>';
+    if (anyGrace || d2.hasGrace) html += '<div class="gracebox">⚠ 寬限期內只繳利息、本金不減少，期滿後月付金會提高，且總利息會比無寬限期時增加。</div>';
   }
 
-  html += '<div class="sect">月付金比較' + (d1.hasGrace || d2.hasGrace ? '（初期）' : '') + '</div>';
-  if (d1.isCombined) {
-    // 方案1為兩筆合計：堆疊長條，兩筆不同顏色相加
-    const w1a = d1.d1a.firstPayment / maxPay * 100;
-    const w1b = d1.d1b.firstPayment / maxPay * 100;
-    html += '<div class="bar-row"><span class="bl">原貸款</span><div class="bar-track" style="display:flex">' +
-      '<div class="bar-fill" style="width:' + w1a + '%;background:#e8505b">$' + nf(d1.d1a.firstPayment) + '</div>' +
-      '<div class="bar-fill" style="width:' + w1b + '%;background:#f6a04d">$' + nf(d1.d1b.firstPayment) + '</div>' +
-      '</div></div>';
-    html += '<div style="font-size:11px;color:#888;margin:2px 0 8px;padding-left:64px">' +
-      '<span style="color:#e8505b">■</span> ' + L1.name + '　<span style="color:#f6a04d">■</span> ' + L1b.name +
-      '　＝ 合計 $' + nf(d1.firstPayment) + '</div>';
+  // 月付金比較
+  html += '<div class="sect">月付金比較' + (anyGrace || d2.hasGrace ? '（初期）' : '') + '</div>';
+  if (multi) {
+    let inner = '';
+    origA.forEach((x, i) => { inner += '<div class="bar-fill" style="width:' + (x.firstPayment / maxPay * 100) + '%;background:' + palette[i % palette.length] + '">$' + nf(x.firstPayment) + '</div>'; });
+    html += '<div class="bar-row"><span class="bl">原貸款</span><div class="bar-track" style="display:flex">' + inner + '</div></div>';
+    const legend = origA.map((x, i) => '<span style="color:' + palette[i % palette.length] + '">■</span> ' + escapeHtml(x.name)).join('　');
+    html += '<div style="font-size:11px;color:#888;margin:2px 0 8px;padding-left:64px">' + legend + '　＝ 合計 $' + nf(sumFirst) + '</div>';
   } else {
-    html += bar(L1.name, d1.firstPayment, '#e8505b');
+    html += bar(escapeHtml(origA[0].name), sumFirst, palette[0]);
   }
-  html += bar(L2.name, d2.firstPayment, '#14a098');
-  if (d1.interestOnly || d2.interestOnly) {
-    html += '<div class="io-warn">⚠ 純繳息方案：每月只繳利息、本金完全未償還，到期需一次清償本金。';
-    if (d1.isCombined) {
-      if (d1.d1a.interestOnly && d1.d1a.balloon) html += L1.name + '期滿需清償 $' + nf(d1.d1a.balloon) + '。';
-      if (d1.d1b.interestOnly && d1.d1b.balloon) html += L1b.name + '期滿需清償 $' + nf(d1.d1b.balloon) + '。';
-    } else if (d1.interestOnly && d1.balloon) {
-      html += L1.name + '期滿需清償 $' + nf(d1.balloon) + '。';
-    }
-    if (d2.interestOnly && d2.balloon) html += L2.name + '期滿需清償 $' + nf(d2.balloon) + '。';
+  html += bar(escapeHtml(L2.name), d2.firstPayment, '#14a098');
+
+  // 違約金 / 清償提醒
+  if (penaltyTotal > 0) {
+    html += '<div class="io-warn">⚠ <b>提前解約違約金</b>（綁約期內清償才收）：';
+    origA.forEach(x => { if (x.penalty > 0) html += '<br>· ' + escapeHtml(x.name) + '：綁約 ' + x.lock + ' 期內（已繳 ' + x.elapsed + ' 期），違約金 $' + nf(x.penalty) + '；清償金額（剩餘本金 + 違約金）$' + nf(x.payoff) + '。'; });
     html += '</div>';
   }
 
+  // 純繳息提醒
+  if (anyIO || d2.interestOnly) {
+    html += '<div class="io-warn">⚠ 純繳息方案：每月只繳利息、本金完全未償還，到期需一次清償本金。';
+    origA.forEach(x => { if (x.interestOnly && x.balloon) html += escapeHtml(x.name) + '期滿需清償 $' + nf(x.balloon) + '。'; });
+    if (d2.interestOnly && d2.balloon) html += escapeHtml(L2.name) + '期滿需清償 $' + nf(d2.balloon) + '。';
+    html += '</div>';
+  }
+
+  // 費用明細 + 回本
   if (hasFees) {
     html += '<div class="sect">費用明細（收費）</div><div class="feebox">';
-    if (svcFee > 0) html += '轉貸服務費：' + (state.svc.mode === 'percent' ? '新貸款額 $' + nf(L2.principal) + ' × ' + state.svc.percent + '% ＝ ' : '') + '<b>$' + nf(svcFee) + '</b><br>';
-    if (advFee > 0) html += '代墊費用：' + (state.adv.mode === 'percent' ? '原貸款額 $' + nf(loan1TotalPrincipal) + ' × ' + state.adv.percent + '% ＝ ' : '') + '<b>$' + nf(advFee) + '</b><br>';
+    if (svcFee > 0) {
+      let f = '';
+      if (state.svc.mode === 'percent') f = '新貸款額 $' + nf(L2.principal) + ' × ' + state.svc.percent + '% ＝ ';
+      else if (state.svc.mode === 'diff') f = '（新貸款 $' + nf(L2.principal) + ' − 銀行原貸 $' + nf(bankPrincipal) + '）× ' + state.svc.percent + '% ＝ ';
+      html += '轉貸服務費：' + f + '<b>$' + nf(svcFee) + '</b><br>';
+    }
+    if (advFee > 0) html += '代墊費用：' + (state.adv.mode === 'percent' ? '非銀行原貸 $' + nf(nonBankPrincipal) + ' × ' + state.adv.percent + '% ＝ ' : '') + '<b>$' + nf(advFee) + '</b><br>';
+    if (penaltyTotal > 0) html += '違約金合計：<b>$' + nf(penaltyTotal) + '</b><br>';
     html += '合計一次性費用：<b>$' + nf(totalFee) + '</b></div>';
 
     html += '<div class="sect">回本速度試算</div><table><tbody>';
@@ -479,17 +573,22 @@ function render() {
     html += '</tbody></table>';
   }
 
-  const r1 = L1.stages[0].rate, r2 = L2.stages[0].rate;
+  // 對客戶的好處
+  const r1 = wAvgRate, r2 = L2.stages[0].rate;
   const rateDrop = r1 - r2;
   const rateDropPct = r1 > 0 ? (rateDrop / r1 * 100) : 0;
   if (monthlySavings > 0 || hasFees || rateDrop > 0) {
     html += '<div class="sect">對客戶的好處</div>';
-    const circ = ['①','②','③','④','⑤'];
+    const circ = ['①', '②', '③', '④', '⑤'];
     let bi = 0;
-    if (rateDrop > 0) html += '<div class="benefit"><span class="n">' + circ[bi++] + ' 利率大幅下降</span><span>年利率由 ' + r1 + '% 降至 ' + r2 + '%，調降 ' + rateDrop.toFixed(2) + ' 個百分點（約 ' + rateDropPct.toFixed(0) + '%）</span></div>';
-    if (monthlySavings > 0) html += '<div class="benefit"><span class="n">' + circ[bi++] + ' 月繳下降</span><span>每月減少 $' + nf(monthlySavings) + '，現金流壓力立即舒緩</span></div>';
-    if (yearsDiff !== 0) html += '<div class="benefit"><span class="n">' + circ[bi++] + ' 還款期' + (yearsDiff > 0 ? '延長' : '縮短') + '</span><span>從 ' + (L1.periods / 12).toFixed(1) + ' 年' + (yearsDiff > 0 ? '拉長' : '縮短') + '至 ' + (L2.periods / 12).toFixed(1) + ' 年</span></div>';
-    if (paybackMonths !== null) html += '<div class="benefit"><span class="n">' + circ[bi++] + ' 費用回本</span><span>支付 $' + nf(totalFee) + '，約 ' + paybackMonths.toFixed(1) + ' 個月回本，長期划算</span></div>';
+    if (rateDrop > 0) html += benefit(circ[bi++], '利率大幅下降', '年利率由 ' + r1.toFixed(2) + '% 降至 ' + r2 + '%，調降 ' + rateDrop.toFixed(2) + ' 個百分點（約 ' + rateDropPct.toFixed(0) + '%）');
+    if (monthlySavings > 0) html += benefit(circ[bi++], '月繳下降', '每月減少 $' + nf(monthlySavings) + '，現金流壓力立即舒緩');
+    if (!multi) {
+      const x = origA[0];
+      const oy = (x.hasDate ? x.remainingPeriods : x.periodsTotal) / 12, ny = L2.periods / 12, yd = ny - oy;
+      if (Math.abs(yd) > 0.05) html += benefit(circ[bi++], '還款期' + (yd > 0 ? '延長' : '縮短'), '從 ' + oy.toFixed(1) + ' 年' + (yd > 0 ? '拉長' : '縮短') + '至 ' + ny.toFixed(1) + ' 年');
+    }
+    if (paybackMonths !== null) html += benefit(circ[bi++], '費用回本', '支付 $' + nf(totalFee) + '，約 ' + paybackMonths.toFixed(1) + ' 個月回本，長期划算');
   }
 
   html += '<p class="disclaimer">本試算僅供參考，實際數字以銀行核貸與帳單為準。</p>';
@@ -497,97 +596,75 @@ function render() {
 }
 
 function bind(id, fn) { document.getElementById(id).addEventListener('input', fn); }
-bind('name1', e => { state.loan1.name = e.target.value || '方案 1'; render(); });
-bind('name1b', e => { state.loan1b.name = e.target.value || '第二筆貸款'; render(); });
+
+// 方案2 綁定
 bind('name2', e => { state.loan2.name = e.target.value || '方案 2'; render(); });
-bind('p1', e => { state.loan1.principal = Number(e.target.value); render(); });
-bind('n1', e => { state.loan1.periods = parseInt(e.target.value) || 0; render(); });
-bind('g1', e => { state.loan1.grace = parseInt(e.target.value) || 0; render(); });
-bind('r1', e => { state.loan1.stages[0].rate = parseFloat(e.target.value) || 0; render(); });
-bind('p2', e => { state.loan2.principal = Number(e.target.value); render(); });
+bind('p2', e => { state.loan2.principal = Number(e.target.value) || 0; render(); });
 bind('n2', e => { state.loan2.periods = parseInt(e.target.value) || 0; render(); });
 bind('g2', e => { state.loan2.grace = parseInt(e.target.value) || 0; render(); });
 bind('r2', e => { state.loan2.stages[0].rate = parseFloat(e.target.value) || 0; render(); });
-
-// 還款方式切換
-function setupRepayToggle(toggleId, loanKey) {
-  const tog = document.getElementById(toggleId);
-  tog.querySelectorAll('button').forEach(btn => {
-    btn.onclick = () => {
-      tog.querySelectorAll('button').forEach(b => b.classList.remove('on'));
-      btn.classList.add('on');
-      state[loanKey].interestOnly = btn.dataset.mode === 'io';
-      render();
-    };
-  });
-}
-setupRepayToggle('toggleRepay1', 'loan1');
-setupRepayToggle('toggleRepay2', 'loan2');
-
-// 第二筆貸款
-document.getElementById('addLoan1b').onclick = () => {
-  state.loan1b.active = true;
-  document.getElementById('loan1bWrap').style.display = 'block';
-  document.getElementById('addLoan1b').style.display = 'none';
-  renderStages('loan1b', 'stages1b');
-  render();
-};
-document.getElementById('removeLoan1b').onclick = () => {
-  state.loan1b.active = false;
-  state.loan1b.principal = 0;
-  document.getElementById('loan1bWrap').style.display = 'none';
-  document.getElementById('addLoan1b').style.display = 'block';
-  render();
-};
-bind('p1b', e => { state.loan1b.principal = Number(e.target.value); render(); });
-bind('n1b', e => { state.loan1b.periods = parseInt(e.target.value) || 0; render(); });
-bind('g1b', e => { state.loan1b.grace = parseInt(e.target.value) || 0; render(); });
-bind('r1b', e => { state.loan1b.stages[0].rate = parseFloat(e.target.value) || 0; render(); });
-setupRepayToggle('toggleRepay1b', 'loan1b');
-
-document.getElementById('add1b').onclick = () => {
-  if (state.loan1b.stages.length >= 4) return;
-  const last = state.loan1b.stages[state.loan1b.stages.length - 1];
-  state.loan1b.stages.push({ fromMonth: Math.min(last.fromMonth + 24, state.loan1b.periods), rate: last.rate });
-  renderStages('loan1b', 'stages1b'); render();
-};
-bind('clientName', e => { state.header.clientName = e.target.value.trim(); render(); });
-bind('agentName', e => { state.header.agentName = e.target.value.trim(); render(); });
-bind('proposalDate', e => { state.header.date = e.target.value; render(); });
-
-document.getElementById('add1').onclick = () => {
-  if (state.loan1.stages.length >= 4) return;
-  const last = state.loan1.stages[state.loan1.stages.length - 1];
-  state.loan1.stages.push({ fromMonth: Math.min(last.fromMonth + 24, state.loan1.periods), rate: last.rate });
-  renderStages('loan1', 'stages1'); render();
-};
+document.getElementById('toggleRepay2').querySelectorAll('button').forEach(btn => {
+  btn.onclick = () => {
+    document.getElementById('toggleRepay2').querySelectorAll('button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    state.loan2.interestOnly = btn.dataset.mode === 'io';
+    render();
+  };
+});
 document.getElementById('add2').onclick = () => {
   if (state.loan2.stages.length >= 4) return;
   const last = state.loan2.stages[state.loan2.stages.length - 1];
   state.loan2.stages.push({ fromMonth: Math.min(last.fromMonth + 24, state.loan2.periods), rate: last.rate });
-  renderStages('loan2', 'stages2'); render();
+  renderStages2(); render();
 };
 
-function setupSeg(segId, key, pctId, amtId) {
-  const seg = document.getElementById(segId);
+// 抬頭綁定
+bind('clientName', e => { state.header.clientName = e.target.value.trim(); render(); });
+bind('agentName', e => { state.header.agentName = e.target.value.trim(); render(); });
+bind('proposalDate', e => { state.header.date = e.target.value; render(); });
+
+// 新增原貸款
+document.getElementById('addOrigLoan').onclick = () => {
+  if (state.origLoans.length >= 5) return;
+  const n = state.origLoans.length + 1;
+  state.origLoans.push({ name: '原貸款 ' + n, isBank: false, interestOnly: false, principal: 0, periods: 120, grace: 0, stages: [{ fromMonth: 1, rate: 0 }], startDate: '', lockPeriods: 0, penaltyPct: 0 });
+  renderOrigLoans(); render();
+};
+
+// 費用模式切換
+(function setupSegSvc() {
+  const seg = document.getElementById('segSvc');
   seg.querySelectorAll('button').forEach(btn => {
     btn.onclick = () => {
       seg.querySelectorAll('button').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
-      state[key].mode = btn.dataset.mode;
-      document.getElementById(pctId).style.display = btn.dataset.mode === 'percent' ? 'block' : 'none';
-      document.getElementById(amtId).style.display = btn.dataset.mode === 'amount' ? 'block' : 'none';
+      state.svc.mode = btn.dataset.mode;
+      const isAmt = btn.dataset.mode === 'amount';
+      document.getElementById('svcPct').style.display = isAmt ? 'none' : 'block';
+      document.getElementById('svcAmt').style.display = isAmt ? 'block' : 'none';
       render();
     };
   });
-}
-setupSeg('segSvc', 'svc', 'svcPct', 'svcAmt');
-setupSeg('segAdv', 'adv', 'advPct', 'advAmt');
+})();
+(function setupSegAdv() {
+  const seg = document.getElementById('segAdv');
+  seg.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      seg.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      state.adv.mode = btn.dataset.mode;
+      document.getElementById('advPct').style.display = btn.dataset.mode === 'percent' ? 'block' : 'none';
+      document.getElementById('advAmt').style.display = btn.dataset.mode === 'amount' ? 'block' : 'none';
+      render();
+    };
+  });
+})();
 bind('svcPercent', e => { state.svc.percent = e.target.value; render(); });
 bind('svcAmount', e => { state.svc.amount = e.target.value; render(); });
 bind('advPercent', e => { state.adv.percent = e.target.value; render(); });
 bind('advAmount', e => { state.adv.amount = e.target.value; render(); });
 
+// 匯出
 async function capture() { return await html2canvas(document.getElementById('proposal'), { scale: 2, backgroundColor: '#ffffff', useCORS: true }); }
 document.getElementById('btnImg').onclick = async function () {
   this.disabled = true; this.textContent = '產生中…';
@@ -610,11 +687,10 @@ document.getElementById('btnPdf').onclick = async function () {
   } finally { this.disabled = false; this.textContent = '匯出 PDF'; }
 };
 
-renderStages('loan1', 'stages1');
-renderStages('loan2', 'stages2');
-// 預設日期為今天
-const todayStr = new Date().toLocaleDateString('zh-TW', {year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-').replace(/(\d{4})-(\d{2})-(\d{2})/,'$1-$2-$3');
-const todayISO = new Date().toISOString().slice(0,10);
+// 初始化
+renderOrigLoans();
+renderStages2();
+const todayISO = new Date().toISOString().slice(0, 10);
 document.getElementById('proposalDate').value = todayISO;
 state.header.date = todayISO;
 render();
