@@ -427,7 +427,7 @@ function render() {
     // 方案1為兩筆合計：堆疊長條，兩筆不同顏色相加
     const w1a = d1.d1a.firstPayment / maxPay * 100;
     const w1b = d1.d1b.firstPayment / maxPay * 100;
-    html += '<div class="bar-row"><span class="bl">合計</span><div class="bar-track" style="display:flex">' +
+    html += '<div class="bar-row"><span class="bl">原貸款</span><div class="bar-track" style="display:flex">' +
       '<div class="bar-fill" style="width:' + w1a + '%;background:#e8505b">$' + nf(d1.d1a.firstPayment) + '</div>' +
       '<div class="bar-fill" style="width:' + w1b + '%;background:#f6a04d">$' + nf(d1.d1b.firstPayment) + '</div>' +
       '</div></div>';
