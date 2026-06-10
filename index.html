@@ -151,6 +151,12 @@
     </div>
   </div>
 
+  <!-- 顯示選項 -->
+  <div class="card" style="border-left:4px solid #6c5ce7">
+    <h3 style="color:#6c5ce7">顯示選項</h3>
+    <label class="bankchk" style="margin-bottom:0"><input type="checkbox" id="showPayback" checked> 提案顯示「回本速度試算」</label>
+  </div>
+
   <div id="proposal"></div>
 </div>
 
@@ -165,7 +171,8 @@ const state = {
   loan2: { name: '方案 2（轉貸後）', principal: 3000000, periods: 240, grace: 0, stages: [{ fromMonth: 1, rate: 2.8 }], interestOnly: false },
   svc: { mode: 'percent', percent: '', amount: '' },
   adv: { mode: 'percent', percent: '', amount: '' },
-  deed: { amount: '' }
+  deed: { amount: '' },
+  ui: { showPayback: true }
 };
 
 const nf = (v) => Math.round(v).toLocaleString('en-US');
@@ -572,14 +579,16 @@ function render() {
     if (penaltyTotal > 0) html += '違約金合計：<b>$' + nf(penaltyTotal) + '</b><br>';
     html += '合計一次性費用：<b>$' + nf(totalFee) + '</b></div>';
 
-    html += '<div class="sect">回本速度試算</div><table><tbody>';
-    html += '<tr><td>一次性費用</td><td>$' + nf(totalFee) + '</td></tr>';
-    html += '<tr><td>每月節省金額</td><td>$' + nf(Math.abs(monthlySavings)) + '</td></tr>';
-    html += paybackMonths !== null
-      ? '<tr class="hl"><td>費用回本時間</td><td>約 ' + paybackMonths.toFixed(1) + ' 個月</td></tr>'
-      : '<tr><td>費用回本時間</td><td>無月省，不適用</td></tr>';
-    if (netSavings > 0) html += '<tr class="hl"><td>回本後總節省<br><span class="small">(總利息差 − 費用)</span></td><td>$' + nf(netSavings) + '</td></tr>';
-    html += '</tbody></table>';
+    if (state.ui.showPayback) {
+      html += '<div class="sect">回本速度試算</div><table><tbody>';
+      html += '<tr><td>一次性費用</td><td>$' + nf(totalFee) + '</td></tr>';
+      html += '<tr><td>每月節省金額</td><td>$' + nf(Math.abs(monthlySavings)) + '</td></tr>';
+      html += paybackMonths !== null
+        ? '<tr class="hl"><td>費用回本時間</td><td>約 ' + paybackMonths.toFixed(1) + ' 個月</td></tr>'
+        : '<tr><td>費用回本時間</td><td>無月省，不適用</td></tr>';
+      if (netSavings > 0) html += '<tr class="hl"><td>回本後總節省<br><span class="small">(總利息差 − 費用)</span></td><td>$' + nf(netSavings) + '</td></tr>';
+      html += '</tbody></table>';
+    }
   }
 
   // 撥款試算（客戶實拿）— 僅當「有填日期」且「有服務費或代墊費」時顯示
@@ -688,6 +697,7 @@ bind('svcAmount', e => { state.svc.amount = e.target.value; render(); });
 bind('advPercent', e => { state.adv.percent = e.target.value; render(); });
 bind('advAmount', e => { state.adv.amount = e.target.value; render(); });
 bind('deedAmount', e => { state.deed.amount = e.target.value; render(); });
+document.getElementById('showPayback').addEventListener('change', e => { state.ui.showPayback = e.target.checked; render(); });
 
 // 匯出
 async function capture() { return await html2canvas(document.getElementById('proposal'), { scale: 2, backgroundColor: '#ffffff', useCORS: true }); }
