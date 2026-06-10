@@ -578,7 +578,7 @@ function render() {
     html += paybackMonths !== null
       ? '<tr class="hl"><td>費用回本時間</td><td>約 ' + paybackMonths.toFixed(1) + ' 個月</td></tr>'
       : '<tr><td>費用回本時間</td><td>無月省，不適用</td></tr>';
-    html += '<tr class="hl"><td>回本後總節省<br><span class="small">(總利息差 − 費用)</span></td><td>$' + nf(netSavings) + '</td></tr>';
+    if (netSavings > 0) html += '<tr class="hl"><td>回本後總節省<br><span class="small">(總利息差 − 費用)</span></td><td>$' + nf(netSavings) + '</td></tr>';
     html += '</tbody></table>';
   }
 
