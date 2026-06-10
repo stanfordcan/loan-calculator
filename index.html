@@ -466,11 +466,17 @@ function render() {
     html += '</tbody></table>';
   }
 
-  if (monthlySavings > 0 || hasFees) {
+  const r1 = L1.stages[0].rate, r2 = L2.stages[0].rate;
+  const rateDrop = r1 - r2;
+  const rateDropPct = r1 > 0 ? (rateDrop / r1 * 100) : 0;
+  if (monthlySavings > 0 || hasFees || rateDrop > 0) {
     html += '<div class="sect">對客戶的好處</div>';
-    if (monthlySavings > 0) html += '<div class="benefit"><span class="n">① 月繳下降</span><span>每月減少 $' + nf(monthlySavings) + '，現金流壓力立即舒緩</span></div>';
-    if (yearsDiff !== 0) html += '<div class="benefit"><span class="n">② 還款期' + (yearsDiff > 0 ? '延長' : '縮短') + '</span><span>從 ' + (L1.periods / 12).toFixed(1) + ' 年' + (yearsDiff > 0 ? '拉長' : '縮短') + '至 ' + (L2.periods / 12).toFixed(1) + ' 年</span></div>';
-    if (paybackMonths !== null) html += '<div class="benefit"><span class="n">③ 費用回本</span><span>支付 $' + nf(totalFee) + '，約 ' + paybackMonths.toFixed(1) + ' 個月回本，長期划算</span></div>';
+    const circ = ['①','②','③','④','⑤'];
+    let bi = 0;
+    if (rateDrop > 0) html += '<div class="benefit"><span class="n">' + circ[bi++] + ' 利率大幅下降</span><span>年利率由 ' + r1 + '% 降至 ' + r2 + '%，調降 ' + rateDrop.toFixed(2) + ' 個百分點（約 ' + rateDropPct.toFixed(0) + '%）</span></div>';
+    if (monthlySavings > 0) html += '<div class="benefit"><span class="n">' + circ[bi++] + ' 月繳下降</span><span>每月減少 $' + nf(monthlySavings) + '，現金流壓力立即舒緩</span></div>';
+    if (yearsDiff !== 0) html += '<div class="benefit"><span class="n">' + circ[bi++] + ' 還款期' + (yearsDiff > 0 ? '延長' : '縮短') + '</span><span>從 ' + (L1.periods / 12).toFixed(1) + ' 年' + (yearsDiff > 0 ? '拉長' : '縮短') + '至 ' + (L2.periods / 12).toFixed(1) + ' 年</span></div>';
+    if (paybackMonths !== null) html += '<div class="benefit"><span class="n">' + circ[bi++] + ' 費用回本</span><span>支付 $' + nf(totalFee) + '，約 ' + paybackMonths.toFixed(1) + ' 個月回本，長期划算</span></div>';
   }
 
   html += '<p class="disclaimer">本試算僅供參考，實際數字以銀行核貸與帳單為準。</p>';
