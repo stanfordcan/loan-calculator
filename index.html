@@ -423,12 +423,29 @@ function render() {
   }
 
   html += '<div class="sect">月付金比較' + (d1.hasGrace || d2.hasGrace ? '（初期）' : '') + '</div>';
-  if (d1.isCombined) html += '<p style="font-size:12px;color:#888;margin:0 0 8px">' + L1.name + '為兩筆合計：$' + nf(d1.d1a.firstPayment) + ' + $' + nf(d1.d1b.firstPayment) + '</p>';
-  html += bar(L1.name, d1.firstPayment, '#e8505b');
+  if (d1.isCombined) {
+    // 方案1為兩筆合計：堆疊長條，兩筆不同顏色相加
+    const w1a = d1.d1a.firstPayment / maxPay * 100;
+    const w1b = d1.d1b.firstPayment / maxPay * 100;
+    html += '<div class="bar-row"><span class="bl">合計</span><div class="bar-track" style="display:flex">' +
+      '<div class="bar-fill" style="width:' + w1a + '%;background:#e8505b">$' + nf(d1.d1a.firstPayment) + '</div>' +
+      '<div class="bar-fill" style="width:' + w1b + '%;background:#f6a04d">$' + nf(d1.d1b.firstPayment) + '</div>' +
+      '</div></div>';
+    html += '<div style="font-size:11px;color:#888;margin:2px 0 8px;padding-left:64px">' +
+      '<span style="color:#e8505b">■</span> ' + L1.name + '　<span style="color:#f6a04d">■</span> ' + L1b.name +
+      '　＝ 合計 $' + nf(d1.firstPayment) + '</div>';
+  } else {
+    html += bar(L1.name, d1.firstPayment, '#e8505b');
+  }
   html += bar(L2.name, d2.firstPayment, '#14a098');
   if (d1.interestOnly || d2.interestOnly) {
     html += '<div class="io-warn">⚠ 純繳息方案：每月只繳利息、本金完全未償還，到期需一次清償本金。';
-    if (d1.interestOnly && d1.balloon) html += L1.name + '期滿需清償 $' + nf(d1.balloon) + '。';
+    if (d1.isCombined) {
+      if (d1.d1a.interestOnly && d1.d1a.balloon) html += L1.name + '期滿需清償 $' + nf(d1.d1a.balloon) + '。';
+      if (d1.d1b.interestOnly && d1.d1b.balloon) html += L1b.name + '期滿需清償 $' + nf(d1.d1b.balloon) + '。';
+    } else if (d1.interestOnly && d1.balloon) {
+      html += L1.name + '期滿需清償 $' + nf(d1.balloon) + '。';
+    }
     if (d2.interestOnly && d2.balloon) html += L2.name + '期滿需清償 $' + nf(d2.balloon) + '。';
     html += '</div>';
   }
