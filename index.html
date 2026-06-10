@@ -156,6 +156,7 @@
   <!-- 顯示選項 -->
   <div class="card" style="border-left:4px solid #6c5ce7">
     <h3 style="color:#6c5ce7">顯示選項</h3>
+    <label class="bankchk"><input type="checkbox" id="showDetail" checked> 提案顯示「原貸款明細」（多筆時）</label>
     <label class="bankchk" style="margin-bottom:0"><input type="checkbox" id="showPayback" checked> 提案顯示「回本速度試算」</label>
   </div>
 
@@ -174,7 +175,7 @@ const state = {
   svc: { mode: 'percent', percent: '', amount: '' },
   adv: { mode: 'percent', percent: '', amount: '' },
   deed: { amount: '' },
-  ui: { showPayback: true }
+  ui: { showPayback: true, showDetail: true }
 };
 
 const nf = (v) => Math.round(v).toLocaleString('en-US');
@@ -491,7 +492,7 @@ function render() {
   }
 
   // 原貸款明細子表（≥2 筆）
-  if (multi) {
+  if (multi && state.ui.showDetail) {
     const showPenCol = penaltyTotal > 0;
     html += '<div class="sect">原貸款明細</div>';
     html += '<table class="detail" style="font-size:11px"><thead><tr><th>名稱</th><th>金額</th>' + (anyDate ? '<th>目前餘額</th>' : '') + '<th>利率</th><th>期數</th><th>月付</th>' + (showPenCol ? '<th>違約金</th><th>清償金額</th>' : '') + '</tr></thead><tbody>';
@@ -700,6 +701,7 @@ bind('advPercent', e => { state.adv.percent = e.target.value; render(); });
 bind('advAmount', e => { state.adv.amount = e.target.value; render(); });
 bind('deedAmount', e => { state.deed.amount = e.target.value; render(); });
 document.getElementById('showPayback').addEventListener('change', e => { state.ui.showPayback = e.target.checked; render(); });
+document.getElementById('showDetail').addEventListener('change', e => { state.ui.showDetail = e.target.checked; render(); });
 
 // 匯出
 async function capture() { return await html2canvas(document.getElementById('proposal'), { scale: 2, backgroundColor: '#ffffff', useCORS: true }); }
