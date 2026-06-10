@@ -575,6 +575,18 @@ function render() {
     html += '</tbody></table>';
   }
 
+  // 撥款試算（客戶實拿）
+  const sumPayoff = origA.reduce((a, x) => a + x.payoff, 0);
+  const netToCustomer = (L2.principal || 0) - sumPayoff - svcFee - advFee;
+  html += '<div class="sect">撥款試算（客戶實拿）</div><table><tbody>';
+  html += '<tr><td>新貸款撥款額</td><td>$' + nf(L2.principal) + '</td></tr>';
+  html += '<tr><td>− 清償原貸款合計' + (penaltyTotal > 0 ? '<br><span class="small">（含違約金 $' + nf(penaltyTotal) + '）</span>' : '') + '</td><td>− $' + nf(sumPayoff) + '</td></tr>';
+  if (svcFee > 0) html += '<tr><td>− 轉貸服務費</td><td>− $' + nf(svcFee) + '</td></tr>';
+  if (advFee > 0) html += '<tr><td>− 代墊費用</td><td>− $' + nf(advFee) + '</td></tr>';
+  html += '<tr class="hl"><td>客戶實際可動用</td><td>$' + nf(netToCustomer) + '</td></tr>';
+  html += '</tbody></table>';
+  if (netToCustomer < 0) html += '<div class="io-warn">⚠ 試算為負，表示新貸款額不足以清償原貸款與費用，客戶需另補差額 $' + nf(Math.abs(netToCustomer)) + '。</div>';
+
   // 對客戶的好處
   const r1 = wAvgRate, r2 = L2.stages[0].rate;
   const rateDrop = r1 - r2;
