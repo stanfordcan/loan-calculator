@@ -79,6 +79,8 @@
   #proposal .pheader-left .client { font-size: 20px; font-weight: bold; color: #1a5490; }
   #proposal .pheader-left .client-label { font-size: 11px; color: #aaa; margin-bottom: 2px; }
   #proposal .pheader-right { text-align: right; font-size: 12px; color: #888; line-height: 1.8; }
+  #proposal .keypoint { background: #eef4fb; border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; font-size: 14px; color: #547; line-height: 1.6; }
+  #proposal .keypoint b { color: #1a5490; font-size: 19px; }
 </style>
 </head>
 <body>
@@ -392,6 +394,17 @@ function render() {
     html += '</div>';
   } else {
     html += '<p class="pdate">試算日期：' + new Date().toLocaleDateString('zh-TW') + '</p>';
+  }
+
+  // 重點結論卡（低調版）
+  const interestSaved = d1.totalInterest - d2.totalInterest;
+  if (monthlySavings > 0 || interestSaved > 0) {
+    let kp = '轉貸後，';
+    const parts = [];
+    if (monthlySavings > 0) parts.push('每月省下 <b>$' + nf(monthlySavings) + '</b>');
+    if (interestSaved > 0) parts.push('總利息估省 <b>$' + nf(interestSaved) + '</b>');
+    kp += parts.join('，') + '。';
+    html += '<div class="keypoint">' + kp + '</div>';
   }
 
   html += '<div class="sect">核心數據對比</div>';
