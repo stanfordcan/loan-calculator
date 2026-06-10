@@ -139,11 +139,15 @@
       <div id="svcPct"><input type="number" step="0.1" id="svcPercent" placeholder="輸入百分比 %"><p class="hint" id="svcFormula"></p><p class="calc" id="svcCalc" style="color:#d68f00"></p></div>
       <div id="svcAmt" style="display:none"><input type="number" id="svcAmount" placeholder="直接輸入金額（元）"></div>
     </div>
-    <div class="field" style="margin-bottom:0">
+    <div class="field">
       <label>代墊費用</label>
       <div class="seg" id="segAdv"><button data-mode="percent" class="on">按 % 計算</button><button data-mode="amount">直接填金額</button></div>
       <div id="advPct"><input type="number" step="0.1" id="advPercent" placeholder="例如 4（% × 非銀行原貸款額）"><p class="hint">基數為「非銀行」原貸款本金合計（銀行那筆不計）</p><p class="calc" id="advCalc" style="color:#d68f00"></p></div>
       <div id="advAmt" style="display:none"><input type="number" id="advAmount" placeholder="直接輸入金額（元）"></div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label>代書費</label>
+      <input type="number" id="deedAmount" placeholder="直接輸入金額（元）">
     </div>
   </div>
 
@@ -160,7 +164,8 @@ const state = {
   ],
   loan2: { name: '方案 2（轉貸後）', principal: 3000000, periods: 240, grace: 0, stages: [{ fromMonth: 1, rate: 2.8 }], interestOnly: false },
   svc: { mode: 'percent', percent: '', amount: '' },
-  adv: { mode: 'percent', percent: '', amount: '' }
+  adv: { mode: 'percent', percent: '', amount: '' },
+  deed: { amount: '' }
 };
 
 const nf = (v) => Math.round(v).toLocaleString('en-US');
@@ -418,7 +423,8 @@ function render() {
   let advFee = 0;
   if (state.adv.mode === 'amount') { const a = parseFloat(state.adv.amount); advFee = a > 0 ? Math.round(a) : 0; }
   else { const p = parseFloat(state.adv.percent); if (p > 0) advFee = Math.round(nonBankPrincipal * p / 100); }
-  const baseFee = svcFee + advFee;
+  let deedFee = 0; { const a = parseFloat(state.deed.amount); deedFee = a > 0 ? Math.round(a) : 0; }
+  const baseFee = svcFee + advFee + deedFee;
   const totalFee = baseFee + penaltyTotal;
   const hasFees = totalFee > 0;
 
@@ -562,6 +568,7 @@ function render() {
       html += '轉貸服務費：' + f + '<b>$' + nf(svcFee) + '</b><br>';
     }
     if (advFee > 0) html += '代墊費用：' + (state.adv.mode === 'percent' ? '非銀行原貸 $' + nf(nonBankPrincipal) + ' × ' + state.adv.percent + '% ＝ ' : '') + '<b>$' + nf(advFee) + '</b><br>';
+    if (deedFee > 0) html += '代書費：<b>$' + nf(deedFee) + '</b><br>';
     if (penaltyTotal > 0) html += '違約金合計：<b>$' + nf(penaltyTotal) + '</b><br>';
     html += '合計一次性費用：<b>$' + nf(totalFee) + '</b></div>';
 
@@ -576,14 +583,15 @@ function render() {
   }
 
   // 撥款試算（客戶實拿）— 僅當「有填日期」且「有服務費或代墊費」時顯示
-  if (anyDate && (svcFee > 0 || advFee > 0)) {
+  if (anyDate && (svcFee > 0 || advFee > 0 || deedFee > 0)) {
     const sumPayoff = origA.reduce((a, x) => a + x.payoff, 0);
-    const netToCustomer = (L2.principal || 0) - sumPayoff - svcFee - advFee;
+    const netToCustomer = (L2.principal || 0) - sumPayoff - svcFee - advFee - deedFee;
     html += '<div class="sect">撥款試算（客戶實拿）</div><table><tbody>';
     html += '<tr><td>新貸款撥款額</td><td>$' + nf(L2.principal) + '</td></tr>';
     html += '<tr><td>− 清償原貸款合計' + (penaltyTotal > 0 ? '<br><span class="small">（含違約金 $' + nf(penaltyTotal) + '）</span>' : '') + '</td><td>− $' + nf(sumPayoff) + '</td></tr>';
     if (svcFee > 0) html += '<tr><td>− 轉貸服務費</td><td>− $' + nf(svcFee) + '</td></tr>';
     if (advFee > 0) html += '<tr><td>− 代墊費用</td><td>− $' + nf(advFee) + '</td></tr>';
+    if (deedFee > 0) html += '<tr><td>− 代書費</td><td>− $' + nf(deedFee) + '</td></tr>';
     html += '<tr class="hl"><td>客戶實際可動用</td><td>$' + nf(netToCustomer) + '</td></tr>';
     html += '</tbody></table>';
     if (netToCustomer < 0) html += '<div class="io-warn">⚠ 試算為負，表示新貸款額不足以清償原貸款與費用，客戶需另補差額 $' + nf(Math.abs(netToCustomer)) + '。</div>';
@@ -679,6 +687,7 @@ bind('svcPercent', e => { state.svc.percent = e.target.value; render(); });
 bind('svcAmount', e => { state.svc.amount = e.target.value; render(); });
 bind('advPercent', e => { state.adv.percent = e.target.value; render(); });
 bind('advAmount', e => { state.adv.amount = e.target.value; render(); });
+bind('deedAmount', e => { state.deed.amount = e.target.value; render(); });
 
 // 匯出
 async function capture() { return await html2canvas(document.getElementById('proposal'), { scale: 2, backgroundColor: '#ffffff', useCORS: true }); }
