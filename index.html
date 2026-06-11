@@ -132,10 +132,10 @@
         <button data-mode="io">純繳息（到期還本）</button>
       </div>
     </div>
-    <div class="field"><label>貸款金額（元）</label><input type="number" id="p2" value="3000000"></div>
-    <div class="field"><label>期數（月）</label><input type="number" id="n2" value="240"><p class="hint" id="y2"></p></div>
+    <div class="field"><label>貸款金額（元）</label><input type="number" id="p2" placeholder="輸入新貸款金額"></div>
+    <div class="field"><label>期數（月）</label><input type="number" id="n2" placeholder="例如 240"><p class="hint" id="y2"></p></div>
     <div class="field" id="g2wrap"><label>寬限期（選填，月）</label><input type="number" id="g2" placeholder="0 = 無寬限期"><p class="hint">寬限期內只繳息、不還本</p></div>
-    <div class="field"><label>第一段利率（%）· 第 1 期起</label><input type="number" step="0.01" id="r2" value="2.8"></div>
+    <div class="field"><label>第一段利率（%）· 第 1 期起</label><input type="number" step="0.01" id="r2" placeholder="例如 2.8"></div>
     <div id="stages2"></div>
     <button class="addbtn" id="add2" style="border-color:#14a098;color:#14a098">+ 新增分段利率（選填）</button>
   </div>
@@ -185,9 +185,9 @@ const palette = ['#e8505b', '#f6a04d', '#e6739f', '#9b59b6', '#e67e22'];
 const state = {
   header: { clientName: '', agentName: '', date: '' },
   origLoans: [
-    { name: '原貸款（現況）', isBank: false, interestOnly: false, principal: 2500000, periods: 120, grace: 0, stages: [{ fromMonth: 1, rate: 14 }], startDate: '', lockPeriods: 0, penaltyPct: 0 }
+    { name: '原貸款（現況）', isBank: false, interestOnly: false, principal: 0, periods: 0, grace: 0, stages: [{ fromMonth: 1, rate: 0 }], startDate: '', lockPeriods: 0, penaltyPct: 0 }
   ],
-  loan2: { name: '方案 2（轉貸後）', principal: 3000000, periods: 240, grace: 0, stages: [{ fromMonth: 1, rate: 2.8 }], interestOnly: false },
+  loan2: { name: '方案 2（轉貸後）', principal: 0, periods: 0, grace: 0, stages: [{ fromMonth: 1, rate: 0 }], interestOnly: false },
   svc: { mode: 'percent', percent: '', amount: '' },
   adv: { mode: 'percent', percent: '', amount: '' },
   deed: { amount: '' },
@@ -327,10 +327,10 @@ function loanCardEl(loan, idx) {
     '<div class="field"><label>還款方式</label><div class="repay-toggle" data-f="repay">' +
       '<button data-mode="amort" class="' + (loan.interestOnly ? '' : 'on') + '">本利攤還</button>' +
       '<button data-mode="io" class="' + (loan.interestOnly ? 'on' : '') + '">純繳息（到期還本）</button></div></div>' +
-    '<div class="field"><label>貸款金額（元）</label><input type="number" data-f="principal" value="' + (loan.principal || '') + '"></div>' +
-    '<div class="field"><label>期數（月）</label><input type="number" data-f="periods" value="' + (loan.periods || '') + '"><p class="hint" data-f="yhint"></p></div>' +
+    '<div class="field"><label>貸款金額（元）</label><input type="number" data-f="principal" value="' + (loan.principal || '') + '" placeholder="輸入貸款金額"></div>' +
+    '<div class="field"><label>期數（月）</label><input type="number" data-f="periods" value="' + (loan.periods || '') + '" placeholder="例如 120"><p class="hint" data-f="yhint"></p></div>' +
     '<div class="field" data-f="gracewrap"' + (loan.interestOnly ? ' style="display:none"' : '') + '><label>寬限期（選填，月）</label><input type="number" data-f="grace" value="' + (loan.grace || '') + '" placeholder="0 = 無寬限期"><p class="hint">寬限期內只繳息、不還本</p></div>' +
-    '<div class="field"><label>第一段利率（%）· 第 1 期起</label><input type="number" step="0.01" data-f="rate0" value="' + loan.stages[0].rate + '"></div>' +
+    '<div class="field"><label>第一段利率（%）· 第 1 期起</label><input type="number" step="0.01" data-f="rate0" value="' + (loan.stages[0].rate || '') + '" placeholder="例如 14"></div>' +
     '<div data-f="stages"></div>' +
     '<button class="addbtn" data-act="addStage" style="border-color:' + col + ';color:' + col + '">+ 新增分段利率（選填）</button>' +
     '<div class="grid2" style="margin-top:14px"><div><label>起始日期（選填）</label><input type="date" data-f="startDate" value="' + (loan.startDate || '') + '"></div>' +
@@ -679,7 +679,7 @@ bind('proposalDate', e => { state.header.date = e.target.value; render(); });
 document.getElementById('addOrigLoan').onclick = () => {
   if (state.origLoans.length >= 5) return;
   const n = state.origLoans.length + 1;
-  state.origLoans.push({ name: '原貸款 ' + n, isBank: false, interestOnly: false, principal: 0, periods: 120, grace: 0, stages: [{ fromMonth: 1, rate: 0 }], startDate: '', lockPeriods: 0, penaltyPct: 0 });
+  state.origLoans.push({ name: '原貸款 ' + n, isBank: false, interestOnly: false, principal: 0, periods: 0, grace: 0, stages: [{ fromMonth: 1, rate: 0 }], startDate: '', lockPeriods: 0, penaltyPct: 0 });
   renderOrigLoans(); render();
 };
 
