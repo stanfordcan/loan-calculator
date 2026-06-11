@@ -671,10 +671,10 @@ function makeQRTag() {
   try {
     if (typeof qrcode === 'undefined' || typeof LZString === 'undefined') return '';
     const text = encodeState();
-    const qr = qrcode(0, 'L');
+    const qr = qrcode(0, 'M');
     qr.addData(text);
     qr.make();
-    return qr.createImgTag(3, 8);
+    return qr.createImgTag(2, 4);
   } catch (e) {
     return '';
   }
