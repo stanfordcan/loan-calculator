@@ -6,6 +6,9 @@
 <title>貸款轉貸提案</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; padding: 14px; background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; color: #333; }
@@ -106,7 +109,9 @@
   <div class="export-bar">
     <button id="btnPdf">匯出 PDF</button>
     <button id="btnImg">匯出圖片</button>
+    <button id="btnImport" style="background:#6c5ce7">匯入提案</button>
   </div>
+  <input type="file" id="importFile" accept="image/*" style="display:none">
 
   <!-- 提案抬頭 -->
   <div class="card header-card">
@@ -169,7 +174,8 @@
   <div class="card" style="border-left:4px solid #6c5ce7">
     <h3 style="color:#6c5ce7">顯示選項</h3>
     <label class="bankchk"><input type="checkbox" id="showDetail" checked> 提案顯示「原貸款明細」（多筆時）</label>
-    <label class="bankchk" style="margin-bottom:0"><input type="checkbox" id="showPayback" checked> 提案顯示「回本速度試算」</label>
+    <label class="bankchk"><input type="checkbox" id="showPayback" checked> 提案顯示「回本速度試算」</label>
+    <label class="bankchk" style="margin-bottom:0"><input type="checkbox" id="showQR" checked> 匯出含「還原碼 QR」（給客戶可關閉）</label>
   </div>
 
   </div><!-- /col-input -->
@@ -191,7 +197,7 @@ const state = {
   svc: { mode: 'percent', percent: '', amount: '' },
   adv: { mode: 'percent', percent: '', amount: '' },
   deed: { amount: '' },
-  ui: { showPayback: true, showDetail: true }
+  ui: { showPayback: true, showDetail: true, showQR: true }
 };
 
 const nf = (v) => Math.round(v).toLocaleString('en-US');
@@ -644,7 +650,34 @@ function render() {
   }
 
   html += '<p class="disclaimer">本試算僅供參考，實際數字以銀行核貸與帳單為準。</p>';
+
+  // 還原碼 QR（匯入用）
+  if (state.ui.showQR) {
+    const qrTag = makeQRTag();
+    if (qrTag) html += '<div style="text-align:center;margin-top:14px">' + qrTag + '<p style="font-size:10px;color:#bbb;margin:4px 0 0">設定還原碼（匯入提案用）</p></div>';
+  }
+
   document.getElementById('proposal').innerHTML = html;
+}
+
+// 將目前所有設定編碼成字串（給 QR）
+function encodeState() {
+  const data = { v: 1, header: state.header, origLoans: state.origLoans, loan2: state.loan2, svc: state.svc, adv: state.adv, deed: state.deed, ui: state.ui };
+  return LZString.compressToEncodedURIComponent(JSON.stringify(data));
+}
+
+// 產生 QR 的 <img> 標籤；資料過大或函式庫未載入時回傳空字串
+function makeQRTag() {
+  try {
+    if (typeof qrcode === 'undefined' || typeof LZString === 'undefined') return '';
+    const text = encodeState();
+    const qr = qrcode(0, 'L');
+    qr.addData(text);
+    qr.make();
+    return qr.createImgTag(3, 8);
+  } catch (e) {
+    return '';
+  }
 }
 
 function bind(id, fn) { document.getElementById(id).addEventListener('input', fn); }
@@ -718,6 +751,86 @@ bind('advAmount', e => { state.adv.amount = e.target.value; render(); });
 bind('deedAmount', e => { state.deed.amount = e.target.value; render(); });
 document.getElementById('showPayback').addEventListener('change', e => { state.ui.showPayback = e.target.checked; render(); });
 document.getElementById('showDetail').addEventListener('change', e => { state.ui.showDetail = e.target.checked; render(); });
+document.getElementById('showQR').addEventListener('change', e => { state.ui.showQR = e.target.checked; render(); });
+
+// ====== 匯入（從匯出的圖片掃 QR 還原） ======
+function applyStateToUI(s) {
+  if (!s || !s.origLoans) throw new Error('資料格式不符');
+  state.header = Object.assign({ clientName: '', agentName: '', date: '' }, s.header || {});
+  state.origLoans = s.origLoans.map(l => Object.assign({ name: '原貸款', isBank: false, interestOnly: false, principal: 0, periods: 0, grace: 0, stages: [{ fromMonth: 1, rate: 0 }], startDate: '', lockPeriods: 0, penaltyPct: 0 }, l));
+  state.loan2 = Object.assign({ name: '方案 2（轉貸後）', principal: 0, periods: 0, grace: 0, stages: [{ fromMonth: 1, rate: 0 }], interestOnly: false }, s.loan2 || {});
+  state.svc = Object.assign({ mode: 'percent', percent: '', amount: '' }, s.svc || {});
+  state.adv = Object.assign({ mode: 'percent', percent: '', amount: '' }, s.adv || {});
+  state.deed = Object.assign({ amount: '' }, s.deed || {});
+  state.ui = Object.assign({ showPayback: true, showDetail: true, showQR: true }, s.ui || {});
+
+  // 回填靜態輸入欄
+  document.getElementById('clientName').value = state.header.clientName || '';
+  document.getElementById('agentName').value = state.header.agentName || '';
+  document.getElementById('proposalDate').value = state.header.date || '';
+  document.getElementById('name2').value = state.loan2.name || '';
+  document.getElementById('p2').value = state.loan2.principal || '';
+  document.getElementById('n2').value = state.loan2.periods || '';
+  document.getElementById('g2').value = state.loan2.grace || '';
+  document.getElementById('r2').value = state.loan2.stages[0].rate || '';
+  // 方案2 還款方式
+  document.getElementById('toggleRepay2').querySelectorAll('button').forEach(b => {
+    b.classList.toggle('on', (b.dataset.mode === 'io') === !!state.loan2.interestOnly);
+  });
+  // 費用：服務費
+  document.getElementById('segSvc').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.svc.mode));
+  document.getElementById('svcPct').style.display = state.svc.mode === 'amount' ? 'none' : 'block';
+  document.getElementById('svcAmt').style.display = state.svc.mode === 'amount' ? 'block' : 'none';
+  document.getElementById('svcPercent').value = state.svc.percent || '';
+  document.getElementById('svcAmount').value = state.svc.amount || '';
+  // 費用：代墊
+  document.getElementById('segAdv').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.adv.mode));
+  document.getElementById('advPct').style.display = state.adv.mode === 'percent' ? 'block' : 'none';
+  document.getElementById('advAmt').style.display = state.adv.mode === 'amount' ? 'block' : 'none';
+  document.getElementById('advPercent').value = state.adv.percent || '';
+  document.getElementById('advAmount').value = state.adv.amount || '';
+  document.getElementById('deedAmount').value = state.deed.amount || '';
+  // 顯示選項
+  document.getElementById('showPayback').checked = !!state.ui.showPayback;
+  document.getElementById('showDetail').checked = !!state.ui.showDetail;
+  document.getElementById('showQR').checked = !!state.ui.showQR;
+
+  renderOrigLoans();
+  renderStages2();
+  render();
+}
+
+document.getElementById('btnImport').onclick = () => document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = function (ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    try {
+      const cv = document.createElement('canvas');
+      const maxW = 1600;
+      const scale = img.width > maxW ? maxW / img.width : 1;
+      cv.width = Math.round(img.width * scale);
+      cv.height = Math.round(img.height * scale);
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      const imgData = ctx.getImageData(0, 0, cv.width, cv.height);
+      const code = (typeof jsQR !== 'undefined') ? jsQR(imgData.data, cv.width, cv.height) : null;
+      if (!code) { alert('找不到還原碼 QR。請確認這是「含還原碼」匯出的提案圖片，且 QR 清晰未被裁切。'); return; }
+      const json = LZString.decompressFromEncodedURIComponent(code.data);
+      const parsed = JSON.parse(json);
+      applyStateToUI(parsed);
+      alert('匯入成功，已還原提案內容。');
+    } catch (e) {
+      alert('匯入失敗：無法解析還原碼。' + (e && e.message ? '（' + e.message + '）' : ''));
+    } finally {
+      URL.revokeObjectURL(img.src);
+      ev.target.value = '';
+    }
+  };
+  img.onerror = () => { alert('圖片讀取失敗。'); ev.target.value = ''; };
+  img.src = URL.createObjectURL(file);
+};
 
 // 匯出
 async function capture() { return await html2canvas(document.getElementById('proposal'), { scale: 2, backgroundColor: '#ffffff', useCORS: true }); }
